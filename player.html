@@ -271,10 +271,11 @@
         }
 
         function flipCard() {
-            if (!isFlipped && currentIndex < cards.length) {
-                flashcard.classList.add('flipped');
-                controls.classList.add('show');
-                isFlipped = true;
+            if (currentIndex < cards.length) {
+                // 使用 toggle() 來回切換翻牌狀態
+                flashcard.classList.toggle('flipped'); 
+                // 只要翻開過一次，底部的按鈕就保持顯示，讓你可以隨時作答
+                controls.classList.add('show'); 
             }
         }
 
