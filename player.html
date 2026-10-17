@@ -199,18 +199,33 @@
     </div>
 
     <script>
-        // === [初始化預留區] ===
-        // 這裡未來可以放入 Firebase Firestore 的初始化代碼
-        // const db = firebase.firestore(); 
+       <!-- 引入 Firebase 相容版 SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-firestore-compat.js"></script>
 
+    <script>
+        // === [1. 初始化 Firebase] ===
+        // TODO: 請到 Firebase 後台 -> 專案設定 -> 一般設定 -> 你的應用程式，複製設定檔貼在下方
+        const firebaseConfig = {
+            apiKey: "你的_API_KEY",
+            authDomain: "你的_PROJECT_ID.firebaseapp.com",
+            projectId: "你的_PROJECT_ID",
+            storageBucket: "你的_PROJECT_ID.appspot.com",
+            messagingSenderId: "你的_MESSAGING_SENDER_ID",
+            appId: "你的_APP_ID"
+        };
+        
+        // 啟動 Firebase 與 Firestore
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+
+        // === [2. 播放器核心邏輯] ===
         let cards = [];
         let currentIndex = 0;
         let isFlipped = false;
 
         const flashcard = document.getElementById('flashcard');
         const controls = document.getElementById('controls');
-
-        // 1. 從網址取得參數 (例如 player.html?set=cushing_01)
         const urlParams = new URLSearchParams(window.location.search);
         const setName = urlParams.get('set');
 
@@ -220,10 +235,8 @@
             loadDeck(setName);
         }
 
-        // 2. 讀取 JSON 題庫
         async function loadDeck(setName) {
             try {
-                // 假設你的資料夾叫做 data，檔案為 .json
                 const response = await fetch(`./data/${setName}.json`);
                 if (!response.ok) throw new Error('檔案讀取失敗');
                 
@@ -235,12 +248,11 @@
                     document.getElementById('question').innerText = "這組題庫是空的！";
                 }
             } catch (error) {
-                document.getElementById('question').innerText = `無法載入題庫 (${setName}.json)，請確定檔案存在。`;
+                document.getElementById('question').innerText = `無法載入題庫 (${setName}.json)`;
                 console.error(error);
             }
         }
 
-        // 3. 渲染目前卡片內容
         function renderCard() {
             if (currentIndex >= cards.length) {
                 showEndScreen();
@@ -251,50 +263,57 @@
             document.getElementById('question').innerText = currentCard.question;
             document.getElementById('answer').innerText = currentCard.answer;
             document.getElementById('note').innerText = currentCard.note;
-            
             document.getElementById('progress-text').innerText = `${currentIndex + 1} / ${cards.length}`;
             
-            // 重置狀態
             flashcard.classList.remove('flipped');
             controls.classList.remove('show');
             isFlipped = false;
         }
 
-        // 4. 點擊翻牌
         function flipCard() {
             if (!isFlipped && currentIndex < cards.length) {
                 flashcard.classList.add('flipped');
-                controls.classList.add('show'); // 翻牌後才顯示按鈕
+                controls.classList.add('show');
                 isFlipped = true;
             }
         }
 
-        // 5. 點擊「不熟」或「掌握」跳下一題
-        function nextCard(status) {
+        // === [3. 寫入 Firebase 邏輯] ===
+        async function nextCard(status) {
             const currentCard = cards[currentIndex];
 
-            // === [FIREBASE 紀錄區] ===
-            // 未來可以在這裡寫入資料庫，例如：
-            // db.collection('review_logs').add({
-            //     deck: setName,
-            //     question: currentCard.question,
-            //     status: status, // 'unfamiliar' 或 'mastered'
-            //     timestamp: new Date()
-            // });
-            
-            console.log(`第 ${currentIndex + 1} 題標記為: ${status}`);
+            // 將按鈕暫時停用，避免快速連點造成重複寫入
+            const btns = document.querySelectorAll('.btn');
+            btns.forEach(btn => btn.style.pointerEvents = 'none');
 
+            try {
+                // 將紀錄寫入 'review_logs' 這個 Collection
+                await db.collection('review_logs').add({
+                    deck_name: setName,                   // 題庫名稱 (例如: cushing_01)
+                    question: currentCard.question,       // 題目內容
+                    answer: currentCard.answer,           // 正確答案
+                    note: currentCard.note,               // 鑑別點解析
+                    status: status,                       // 'unfamiliar' (不熟) 或 'mastered' (掌握)
+                    timestamp: firebase.firestore.FieldValue.serverTimestamp() // 伺服器標準時間
+                });
+                console.log("雲端同步成功:", status);
+            } catch (error) {
+                console.error("寫入 Firestore 失敗 (可能在離線狀態):", error);
+            }
+
+            // 恢復按鈕功能並進入下一題
+            btns.forEach(btn => btn.style.pointerEvents = 'auto');
             currentIndex++;
             renderCard();
         }
 
-        // 6. 題庫刷完的畫面
         function showEndScreen() {
             document.getElementById('card-container').style.display = 'none';
             document.getElementById('controls').style.display = 'none';
             document.getElementById('end-screen').style.display = 'block';
             document.getElementById('progress-text').innerText = "完成";
         }
+    </script>
     </script>
 </body>
 </html>
