@@ -242,12 +242,17 @@
         </div>
     </div>
 
-    <!-- 結束畫面 -->
+<!-- 結束畫面 -->
     <div class="end-screen" id="end-screen">
         <h2>🎉 複習完成！</h2>
         <p>這組錯題已經全部刷完。</p>
         <br>
         <a href="index.html" class="back-btn" style="padding: 12px 24px; background: var(--primary-color); color: white; border-radius: 8px;">回目錄</a>
+        <br><br><br>
+        <!-- ⚠️ 這是一個臨時的搬家按鈕，搬完就可以刪掉了 -->
+        <button onclick="migrateDataToFirestore()" style="background: red; color: white; padding: 10px; border: none; border-radius: 5px; cursor: pointer;">
+            🚀 點我進行資料大搬風 (轉移至 Firestore)
+        </button>
     </div>
 
     <!-- 底部按鈕 -->
@@ -395,6 +400,48 @@
             // 切換按鈕顯示
             btnEdit.style.display = 'none';
             btnSave.style.display = 'inline-block';
+            // === [5. ⚠️ 資料大搬風 (一次性腳本)] ===
+        
+        // 這個函數只會在你點擊特定按鈕時觸發
+        async function migrateDataToFirestore() {
+            if (!cards || cards.length === 0) {
+                alert("目前沒有讀取到任何題目，請確認 JSON 檔是否正確載入！");
+                return;
+            }
+
+            const confirmMigration = confirm(`準備將目前畫面上的 ${cards.length} 題資料搬移到 Firestore。\n\n⚠️ 搬移前請確認：你是否已經在 Firebase 後台啟用了 Firestore，並且設定為「測試模式」？`);
+            
+            if (!confirmMigration) return;
+
+            let successCount = 0;
+            let errorCount = 0;
+
+            console.log("開始搬移資料...");
+
+            // 取得對應這組題庫的 Collection 參照 (例如：flashcards_Respiration01)
+            const collectionRef = db.collection(`flashcards_${setName}`);
+
+            for (let i = 0; i < cards.length; i++) {
+                const card = cards[i];
+                try {
+                    // 將單題寫入 Firestore
+                    // 我們額外加上一個 createdAt 欄位記錄時間，方便以後排序
+                    await collectionRef.add({
+                        question: card.question,
+                        answer: card.answer,
+                        note: card.note,
+                        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                    });
+                    successCount++;
+                    console.log(`第 ${i + 1} 題上傳成功！`);
+                } catch (error) {
+                    errorCount++;
+                    console.error(`第 ${i + 1} 題上傳失敗:`, error);
+                }
+            }
+
+            alert(`搬移完成！\n成功：${successCount} 題\n失敗：${errorCount} 題\n\n如果全部成功，請到 Firebase 後台確認資料是否出現。`);
+        }
         }
 
         async function saveNote(event) {
