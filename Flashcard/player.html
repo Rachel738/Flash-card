@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>錯題閃卡</title>
+    <style>
+        :root {
+            --bg-color: #f4f6f8;
+            --card-bg: #ffffff;
+            --text-main: #2d3748;
+            --text-muted: #718096;
+            --primary-color: #4299e1;
+            --success-color: #48bb78;
+            --danger-color: #f56565;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            margin: 0;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden; /* 防止手機上下滑動反彈 */
+        }
+
+        /* 頂部導覽列 */
+        header {
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: var(--card-bg);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+
+        .back-btn {
+            text-decoration: none;
+            color: var(--primary-color);
+            font-weight: bold;
+            font-size: 1.1rem;
+        }
+
+        .progress {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        /* 卡片區域 (3D 翻轉容器) */
+        .card-container {
+            flex: 1;
+            padding: 30px 20px;
+            perspective: 1000px; /* 創造 3D 深度 */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .card-inner {
+            width: 100%;
+            max-width: 500px;
+            height: 100%;
+            max-height: 400px;
+            position: relative;
+            transition: transform 0.6s;
+            transform-style: preserve-3d;
+            cursor: pointer;
+        }
+
+        /* 控制翻轉的 class */
+        .card-inner.flipped {
+            transform: rotateY(180deg);
+        }
+
+        .card-front, .card-back {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden; /* 翻轉後隱藏背面 */
+            border-radius: 16px;
+            background: var(--card-bg);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            padding: 24px;
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            text-align: left;
+            overflow-y: auto;
+        }
+
+        .card-back {
+            transform: rotateY(180deg);
+            background-color: #fafbfc; /* 背面微調底色 */
+        }
+
+        .question-text {
+            font-size: 1.1rem;
+            line-height: 1.6;
+        }
+
+        .answer-text {
+            font-size: 3rem;
+            font-weight: bold;
+            color: var(--primary-color);
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .note-text {
+            font-size: 1rem;
+            color: var(--danger-color);
+            border-top: 1px dashed #e2e8f0;
+            padding-top: 20px;
+            text-align: center;
+        }
+
+        /* 底部操作按鈕 */
+        .controls {
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            background: var(--bg-color);
+            opacity: 0; /* 預設隱藏，翻牌後才顯示 */
+            transition: opacity 0.3s;
+            pointer-events: none;
+        }
+
+        .controls.show {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .btn {
+            flex: 1;
+            max-width: 150px;
+            padding: 15px 0;
+            border: none;
+            border-radius: 12px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            color: white;
+            cursor: pointer;
+            transition: transform 0.1s;
+        }
+
+        .btn:active {
+            transform: scale(0.95);
+        }
+
+        .btn-danger { background-color: var(--danger-color); }
+        .btn-success { background-color: var(--success-color); }
+
+        /* 結束畫面 */
+        .end-screen {
+            display: none;
+            text-align: center;
+            padding: 40px 20px;
+        }
+
+        .end-screen h2 { margin-bottom: 10px; }
+    </style>
+</head>
+<body>
+
+    <header id="header">
+        <a href="index.html" class="back-btn">← 回總覽</a>
+        <div class="progress" id="progress-text">載入中...</div>
+    </header>
+
+    <!-- 閃卡播放區 -->
+    <div class="card-container" id="card-container">
+        <div class="card-inner" id="flashcard" onclick="flipCard()">
+            <div class="card-front">
+                <div class="question-text" id="question">讀取題目中...</div>
+            </div>
+            <div class="card-back">
+                <div class="answer-text" id="answer"></div>
+                <div class="note-text" id="note"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 結束畫面 -->
+    <div class="end-screen" id="end-screen">
+        <h2>🎉 複習完成！</h2>
+        <p>這組錯題已經全部刷完。</p>
+        <br>
+        <a href="index.html" class="back-btn" style="padding: 12px 24px; background: var(--primary-color); color: white; border-radius: 8px;">回目錄</a>
+    </div>
+
+    <!-- 底部按鈕 -->
+    <div class="controls" id="controls">
+        <button class="btn btn-danger" onclick="nextCard('unfamiliar')">不熟</button>
+        <button class="btn btn-success" onclick="nextCard('mastered')">掌握</button>
+    </div>
+
+    <script>
+       <!-- 引入 Firebase 相容版 SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-firestore-compat.js"></script>
+
+    <script>
+        // === [1. 初始化 Firebase] ===
+        // TODO: 請到 Firebase 後台 -> 專案設定 -> 一般設定 -> 你的應用程式，複製設定檔貼在下方
+        const firebaseConfig = {
+            apiKey: "你的_API_KEY",
+            authDomain: "你的_PROJECT_ID.firebaseapp.com",
+            projectId: "你的_PROJECT_ID",
+            storageBucket: "你的_PROJECT_ID.appspot.com",
+            messagingSenderId: "你的_MESSAGING_SENDER_ID",
+            appId: "你的_APP_ID"
+        };
+        
+        // 啟動 Firebase 與 Firestore
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+
+        // === [2. 播放器核心邏輯] ===
+        let cards = [];
+        let currentIndex = 0;
+        let isFlipped = false;
+
+        const flashcard = document.getElementById('flashcard');
+        const controls = document.getElementById('controls');
+        const urlParams = new URLSearchParams(window.location.search);
+        const setName = urlParams.get('set');
+
+        if (!setName) {
+            document.getElementById('question').innerText = "錯誤：找不到題庫參數";
+        } else {
+            loadDeck(setName);
+        }
+
+        async function loadDeck(setName) {
+            try {
+                const response = await fetch(`./data/${setName}.json`);
+                if (!response.ok) throw new Error('檔案讀取失敗');
+                
+                cards = await response.json();
+                
+                if (cards.length > 0) {
+                    renderCard();
+                } else {
+                    document.getElementById('question').innerText = "這組題庫是空的！";
+                }
+            } catch (error) {
+                document.getElementById('question').innerText = `無法載入題庫 (${setName}.json)`;
+                console.error(error);
+            }
+        }
+
+        function renderCard() {
+            if (currentIndex >= cards.length) {
+                showEndScreen();
+                return;
+            }
+
+            const currentCard = cards[currentIndex];
+            document.getElementById('question').innerText = currentCard.question;
+            document.getElementById('answer').innerText = currentCard.answer;
+            document.getElementById('note').innerText = currentCard.note;
+            document.getElementById('progress-text').innerText = `${currentIndex + 1} / ${cards.length}`;
+            
+            flashcard.classList.remove('flipped');
+            controls.classList.remove('show');
+            isFlipped = false;
+        }
+
+        function flipCard() {
+            if (!isFlipped && currentIndex < cards.length) {
+                flashcard.classList.add('flipped');
+                controls.classList.add('show');
+                isFlipped = true;
+            }
+        }
+
+        // === [3. 寫入 Firebase 邏輯] ===
+        async function nextCard(status) {
+            const currentCard = cards[currentIndex];
+
+            // 將按鈕暫時停用，避免快速連點造成重複寫入
+            const btns = document.querySelectorAll('.btn');
+            btns.forEach(btn => btn.style.pointerEvents = 'none');
+
+            try {
+                // 將紀錄寫入 'review_logs' 這個 Collection
+                await db.collection('review_logs').add({
+                    deck_name: setName,                   // 題庫名稱 (例如: cushing_01)
+                    question: currentCard.question,       // 題目內容
+                    answer: currentCard.answer,           // 正確答案
+                    note: currentCard.note,               // 鑑別點解析
+                    status: status,                       // 'unfamiliar' (不熟) 或 'mastered' (掌握)
+                    timestamp: firebase.firestore.FieldValue.serverTimestamp() // 伺服器標準時間
+                });
+                console.log("雲端同步成功:", status);
+            } catch (error) {
+                console.error("寫入 Firestore 失敗 (可能在離線狀態):", error);
+            }
+
+            // 恢復按鈕功能並進入下一題
+            btns.forEach(btn => btn.style.pointerEvents = 'auto');
+            currentIndex++;
+            renderCard();
+        }
+
+        function showEndScreen() {
+            document.getElementById('card-container').style.display = 'none';
+            document.getElementById('controls').style.display = 'none';
+            document.getElementById('end-screen').style.display = 'block';
+            document.getElementById('progress-text').innerText = "完成";
+        }
+    </script>
+    </script>
+</body>
+</html>
