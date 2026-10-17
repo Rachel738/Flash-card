@@ -198,8 +198,7 @@
         <button class="btn btn-success" onclick="nextCard('mastered')">掌握</button>
     </div>
 
-    <script>
-       <!-- 引入 Firebase 相容版 SDK -->
+
     <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-firestore-compat.js"></script>
 
@@ -291,7 +290,7 @@
                 // 將紀錄寫入 'review_logs' 這個 Collection
                 await db.collection('review_logs').add({
                     deck_name: setName,                   // 題庫名稱 (例如: cushing_01)
-                    question: currentCard.question,       // 題目內容
+                    question: currentCAard.question,       // 題目內容
                     answer: currentCard.answer,           // 正確答案
                     note: currentCard.note,               // 鑑別點解析
                     status: status,                       // 'unfamiliar' (不熟) 或 'mastered' (掌握)
