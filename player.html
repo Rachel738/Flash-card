@@ -160,6 +160,59 @@
             text-align: center;
             padding: 40px 20px;
         }
+        /* 編輯區域樣式 */
+        textarea.note-text {
+            width: 100%;
+            flex: 1;
+            font-size: 1rem;
+            color: var(--danger-color);
+            border: 1px dashed transparent; /* 平常沒有框線 */
+            border-top: 1px dashed #e2e8f0;
+            padding: 20px 10px 10px;
+            text-align: center;
+            background: transparent;
+            resize: none; /* 防止使用者亂拉大小 */
+            font-family: inherit;
+            outline: none;
+            transition: all 0.2s;
+        }
+
+        /* 進入編輯模式時的樣式 */
+        textarea.note-text.editing {
+            border: 2px solid var(--primary-color);
+            background: #fff;
+            border-radius: 8px;
+            color: var(--text-main);
+            text-align: left; /* 編輯時靠左對齊比較好打字 */
+            padding: 10px;
+        }
+
+        .edit-controls {
+            display: flex;
+            justify-content: flex-end;
+            margin-top: 10px;
+            gap: 10px;
+        }
+
+        .btn-edit, .btn-save {
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            padding: 5px 10px;
+            border-radius: 4px;
+            transition: background 0.2s;
+        }
+
+        .btn-edit:hover, .btn-save:hover {
+            background: #e2e8f0;
+        }
+        
+        .btn-save {
+            color: var(--success-color);
+            font-weight: bold;
+        }
 
         .end-screen h2 { margin-bottom: 10px; }
     </style>
@@ -179,7 +232,12 @@
             </div>
             <div class="card-back">
                 <div class="answer-text" id="answer"></div>
-                <div class="note-text" id="note"></div>
+                <!-- 改成 textarea，平常設定為唯讀，點擊按鈕時才解除 -->
+                <textarea class="note-text" id="note" readonly placeholder="這裡目前沒有筆記..."></textarea>
+                <div class="edit-controls" id="edit-controls">
+                    <button class="btn-edit" id="btn-edit" onclick="toggleEditMode(event)">✏️ 編輯</button>
+                    <button class="btn-save" id="btn-save" style="display: none;" onclick="saveNote(event)">💾 儲存</button>
+                </div>
             </div>
         </div>
     </div>
@@ -313,6 +371,57 @@
             document.getElementById('controls').style.display = 'none';
             document.getElementById('end-screen').style.display = 'block';
             document.getElementById('progress-text').innerText = "完成";
+        }
+        // === [4. 編輯解析邏輯] ===
+        
+        // 防止點擊編輯區域時，觸發卡片的翻轉
+        document.getElementById('note').addEventListener('click', function(e) {
+            e.stopPropagation();
+        });
+
+        function toggleEditMode(event) {
+            // 阻止事件往上傳遞，以免觸發 flipCard
+            event.stopPropagation(); 
+            
+            const noteElement = document.getElementById('note');
+            const btnEdit = document.getElementById('btn-edit');
+            const btnSave = document.getElementById('btn-save');
+
+            // 解除唯讀，進入編輯模式
+            noteElement.readOnly = false;
+            noteElement.classList.add('editing');
+            noteElement.focus(); // 自動游標對焦
+
+            // 切換按鈕顯示
+            btnEdit.style.display = 'none';
+            btnSave.style.display = 'inline-block';
+        }
+
+        async function saveNote(event) {
+            event.stopPropagation();
+            
+            const noteElement = document.getElementById('note');
+            const btnEdit = document.getElementById('btn-edit');
+            const btnSave = document.getElementById('btn-save');
+            const newNote = noteElement.value;
+
+            // 把新內容更新到目前的卡片陣列中，確保這輪再翻到時是新的
+            cards[currentIndex].note = newNote;
+
+            // 【進階挑戰】這裡未來會換成 Firebase 的更新指令
+            // 由於目前資料還是從 JSON 來的，我們只能先假裝存檔
+            // await db.collection('flashcards').doc(cards[currentIndex].id).update({ note: newNote });
+            
+            console.log("已更新解析為：", newNote);
+            alert("解析已更新！（目前為本地暫存，重整後恢復原狀。未來將串接 Firebase）");
+
+            // 恢復唯讀狀態
+            noteElement.readOnly = true;
+            noteElement.classList.remove('editing');
+            
+            // 切換按鈕顯示
+            btnSave.style.display = 'none';
+            btnEdit.style.display = 'inline-block';
         }
     </script>
     </script>
