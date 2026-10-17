@@ -1,0 +1,42 @@
+[
+  {
+    "question": "阻塞性肺病 (Obstructive lung disease) 主要使用哪個肺功能數值進行判斷？\n(A) FEV1\n(B) FEV1/FVC\n(C) TLC\n(D) DLCO/VA",
+    "answer": "B",
+    "note": "FEV1/FVC < 70% 是診斷氣道阻塞性肺病的主要標準。"
+  },
+  {
+    "question": "限制型（侷限性）肺病 (Restrictive lung disease) 主要使用哪個肺功能數值進行判斷？\n(A) FEV1\n(B) FEV1/FVC\n(C) TLC\n(D) DLCO/VA",
+    "answer": "C",
+    "note": "全肺容量 TLC < 80% 是診斷限制型肺病的主要標準。"
+  },
+  {
+    "question": "What type of breath sound is heard in the peripheral lung areas in a healthy individual?\n(A) Tracheal breath sounds\n(B) Bronchial breath sounds\n(C) Bronchovesicular sounds\n(D) Vesicular sounds\n(E) Adventitious sounds",
+    "answer": "D",
+    "note": "健康個體在周邊肺野聽診到的正常呼吸音為 Vesicular sounds（肺泡呼吸音）。"
+  },
+  {
+    "question": "Which of the following is the most common cause of chronic cough (咳嗽 > 8週)？\n(A) Upper respiratory tract infection\n(B) Gastroesophageal reflux disease (GERD)\n(C) Pulmonary embolism\n(D) Pulmonary edema\n(E) Pleural effusion",
+    "answer": "B",
+    "note": "慢性咳嗽（>8週）常見原因包括 GERD、氣喘與鼻竇炎，而非上呼吸道感染。"
+  },
+  {
+    "question": "關於咳血 (Hemoptysis) 與吐血 (Hematemesis) 的鑑別，何者為咳血的典型特徵？\n(A) Dark colored and food particle\n(B) Frothy and accompanied with cough\n(C) Vomit\n(D) Without cough\n(E) Coffee grounds appearance",
+    "answer": "B",
+    "note": "咳血源自呼吸道，常伴隨咳嗽且帶有泡沫 (frothy)。"
+  },
+  {
+    "question": "檢測動脈血氣體分析 (ABG) 結果為：pH 7.286、PaCO2 38.3 mmHg、HCO3⁻ 17.8 mmol/L，請問此患者屬於何種酸鹼失衡？\n(A) 呼吸性酸中毒\n(B) 代謝性酸中毒\n(C) 呼吸性鹼中毒\n(D) 代謝性鹼中毒",
+    "answer": "B",
+    "note": "pH < 7.35 表示酸血症，結合 HCO3⁻ 降低且 PaCO2 正常診斷為代謝性酸中毒。"
+  },
+  {
+    "question": "下列何者是氧氣治療的固定效能（Fixed performance）裝置？\n(A) Venturi mask\n(B) Nasal cannula\n(C) Partial rebreathing mask\n(D) Nasal catheter",
+    "answer": "A",
+    "note": "Venturi mask 能精確提供設定氧氣濃度且不受患者吸氣流速影響，屬固定效能裝置。"
+  },
+  {
+    "question": "有關支氣管擴張症 (Bronchiectasis) 的敘述，下列何者錯誤？\n(A) 常見症狀有慢性咳嗽、喘、咳血\n(B) 若病人有咳血，在詢問完病史及理學檢查後，應做 X 光檢查\n(C) 姿勢性排痰很麻煩，若病人不想做可以不要做\n(D) X-ray 可見 tram track，CT 可見 signet ring sign",
+    "answer": "C",
+    "note": "姿勢引流拍痰是促進氣道清除與預防感染的核心治療，不可隨意取消。"
+  }
+]
